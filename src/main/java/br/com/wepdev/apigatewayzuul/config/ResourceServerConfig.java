@@ -36,7 +36,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     /*
     Rotas que para acessar precisam do perfil de ADMIN
      */
-    private static final String[] ADMIN = {"/recursos-humanos-folha-pagamento/**", "/usuario/**"};
+    private static final String[] ADMIN = {"/recursos-humanos-folha-pagamento/**", "/usuario/**" , "/actuator/refresh"
+            , "/recursos-humanos-trabalhadores/actuator/refresh" ,  "/oauth/actuator/refresh"};
 
 
     /**
