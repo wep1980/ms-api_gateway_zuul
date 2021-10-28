@@ -1,13 +1,22 @@
 package br.com.wepdev.apigatewayzuul.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+
+import java.util.Arrays;
 
 
 /**
@@ -64,5 +73,52 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, OPERATOR).hasAnyRole("OPERATOR", "ADMIN") // tem autorização somente nos metodos GET as rotas que estao nos perfis
                 .antMatchers(ADMIN).hasAnyRole("ADMIN") // So acessa as rotas do ADMIN quem tiver o perfil de ADMIN
                 .anyRequest().authenticated(); // Qualquer rota que nao esteja especificada, e exigido a autenticação para acessar
+
+        http.cors().configurationSource(corsConfigurationSource());
     }
+
+
+    /**
+     * Metodo para liberação de CORS
+     * @return
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource(){
+
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.setAllowedOrigins(Arrays.asList("*")); // Origens que serao permitidas, quem vai poder acessar o sistema. TODAS
+        corsConfiguration.setAllowedMethods(Arrays.asList("POST", "GET" , "PUT", "DELETE", "PATCH")); // Todos os metodos sao permitidos
+        corsConfiguration.setAllowCredentials(true); // Permite credenciais
+        corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); // Cabeçalhos permitidos
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfiguration); // path com todos os caminhos, e a configuração feita acima
+
+        return source;
+    }
+
+
+    /**
+     * Metodo que vai ser o filtro de CORS
+     * @return
+     */
+    @Bean
+    public FilterRegistrationBean<CorsFilter> corsFilter(){
+        FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(corsConfigurationSource()));
+        bean.setOrder(Ordered.HIGHEST_PRECEDENCE); // A ordem vai ser a procedencia mais alta que tiver
+        return bean;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
