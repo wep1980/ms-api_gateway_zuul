@@ -45,8 +45,12 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     /*
     Rotas que para acessar precisam do perfil de ADMIN
      */
-    private static final String[] ADMIN = {"/recursos-humanos-folha-pagamento/**", "/usuario/**" , "/actuator/refresh"
-            , "/recursos-humanos-trabalhadores/actuator/refresh" ,  "/oauth/actuator/refresh"};
+    private static final String[] ADMIN = {
+            "/recursos-humanos-folha-pagamento/**",
+            "/usuario/**",
+            "/actuator/**",
+            "/recursos-humanos-trabalhadores/actuator/**",
+            "/oauth/actuator/**"};
 
 
     /**
@@ -71,7 +75,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers(PUBLIC).permitAll() // Todos tem permissao para acessar essas rotas
                 .antMatchers(HttpMethod.GET, OPERATOR).hasAnyRole("OPERATOR", "ADMIN") // tem autorização somente nos metodos GET as rotas que estao nos perfis
-                .antMatchers(ADMIN).hasAnyRole("ADMIN") // So acessa as rotas do ADMIN quem tiver o perfil de ADMIN
+                .antMatchers(ADMIN).hasRole("ADMIN") // So acessa as rotas do ADMIN quem tiver o perfil de ADMIN
                 .anyRequest().authenticated(); // Qualquer rota que nao esteja especificada, e exigido a autenticação para acessar
 
         http.cors().configurationSource(corsConfigurationSource());
@@ -85,14 +89,14 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource(){
 
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(Arrays.asList("*")); // Origens que serao permitidas, quem vai poder acessar o sistema. TODAS
-        corsConfiguration.setAllowedMethods(Arrays.asList("POST", "GET" , "PUT", "DELETE", "PATCH")); // Todos os metodos sao permitidos
-        corsConfiguration.setAllowCredentials(true); // Permite credenciais
-        corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); // Cabeçalhos permitidos
+        CorsConfiguration corsConfig = new CorsConfiguration();
+        corsConfig.setAllowedOrigins(Arrays.asList("*")); // Origens que serao permitidas, quem vai poder acessar o sistema. TODAS
+        corsConfig.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE", "PATCH")); // Todos os metodos sao permitidos
+        corsConfig.setAllowCredentials(true); // Permite credenciais
+        corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); // Cabeçalhos permitidos
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", corsConfiguration); // path com todos os caminhos, e a configuração feita acima
+        source.registerCorsConfiguration("/**", corsConfig); // path com todos os caminhos, e a configuração feita acima
 
         return source;
     }
@@ -103,22 +107,11 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
      * @return
      */
     @Bean
-    public FilterRegistrationBean<CorsFilter> corsFilter(){
-        FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(corsConfigurationSource()));
-        bean.setOrder(Ordered.HIGHEST_PRECEDENCE); // A ordem vai ser a procedencia mais alta que tiver
+    public FilterRegistrationBean<CorsFilter> corsFilter() {
+        FilterRegistrationBean<CorsFilter> bean
+                = new FilterRegistrationBean<>(new CorsFilter(corsConfigurationSource()));
+        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return bean;
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
